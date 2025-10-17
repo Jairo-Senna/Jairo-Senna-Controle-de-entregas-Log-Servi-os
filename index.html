@@ -221,15 +221,26 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Variáveis globais de ambiente (MANDATÓRIO usar estas)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // Variáveis de Configuração do Firebase
+        // IMPORTANTE: PARA PUBLICAR NO GITHUB PAGES, SUBSTITUA O CONTEÚDO DESTA VARIÁVEL
+        const FIREBASE_CONFIG_PLACEHOLDER = {
+            apiKey: "SEU_API_KEY_AQUI", // <-- SUBSTITUIR COM SUA API KEY
+            authDomain: "SEU_PROJECT_ID.firebaseapp.com", // <-- SUBSTITUIR COM SEU DOMÍNIO
+            projectId: "SEU_PROJECT_ID", // <-- SUBSTITUIR COM SEU PROJECT ID
+            storageBucket: "SEU_PROJECT_ID.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID",
+        };
+
+        // Lógica para usar a configuração do ambiente (Canvas) ou o Placeholder (GitHub Pages)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : FIREBASE_CONFIG_PLACEHOLDER.projectId;
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : FIREBASE_CONFIG_PLACEHOLDER;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         let app, db, auth, userId = null;
         let isAuthReady = false; 
         
-        // NOVO: Armazena os últimos registos carregados para edição
+        // Armazena os últimos registos carregados para edição
         let currentEntries = []; 
         
         // Ativar logs do Firestore para ajudar na depuração
@@ -320,9 +331,11 @@
         // 1. Configuração e Autenticação do Firebase
         async function setupFirebase() {
             try {
-                if (Object.keys(firebaseConfig).length === 0) {
-                     console.error("Configuração do Firebase ausente.");
-                     userInfoEl.textContent = "Erro: Configuração do Firebase não encontrada.";
+                // Verifica se o usuário precisa substituir as credenciais no GitHub Pages
+                if (firebaseConfig.apiKey === "SEU_API_KEY_AQUI" && typeof __firebase_config === 'undefined') {
+                     userInfoEl.innerHTML = `
+                        <p class="text-base font-semibold text-red-600">ERRO DE CONFIGURAÇÃO (GitHub Pages)</p>
+                        <p class="text-sm">Por favor, substitua os valores de <code>FIREBASE_CONFIG_PLACEHOLDER</code> no código JavaScript com a sua configuração real do Firebase para que a aplicação funcione.</p>`;
                      return;
                 }
                 
@@ -336,10 +349,11 @@
                             userId = user.uid;
                             userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
                         } else {
+                            // No GitHub Pages, o token personalizado não existe, usamos signInAnonymously().
                             if (initialAuthToken) {
                                 await signInWithCustomToken(auth, initialAuthToken);
                             } else {
-                                await signInAnonymously(auth);
+                                await signInAnonymously(auth); 
                             }
                         }
                         isAuthReady = true;
@@ -355,7 +369,8 @@
         // 2. Caminho da Coleção (Privada do Utilizador)
         function getEntriesCollectionRef() {
             if (!db || !userId) {
-                throw new Error("Firestore ou ID do utilizador não estão prontos.");
+                // Se a autenticação falhou (ex: credenciais erradas no GH Pages)
+                throw new Error("Firestore ou ID do utilizador não estão prontos. Verifique a configuração do Firebase.");
             }
             return collection(db, `artifacts/${appId}/users/${userId}/daily_earnings`);
         }
