@@ -1,5 +1,0 @@
-{
-  "name": "Controle de Entregas Log Serviços",
-  "description": "Um aplicativo para entregadores autônomos rastrearem suas entregas e ganhos diários, quinzenais e mensais. Todos os dados são salvos localmente no seu navegador.",
-  "requestFramePermissions": []
-}
