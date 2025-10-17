@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ganhos de Entregador</title>
+    <!-- Inclui o Tailwind CSS para um design moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Define a fonte Inter e algumas classes básicas de cor -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-default); }
+        
+        /* Variáveis de Tema (Light Mode Padrão) */
+        :root {
+            --bg-body: #f7f9fb;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --bg-highlight: #f3f4f6;
+            --text-default: #1f2937;
+            --text-secondary: #4b5563;
+            --border-color: #e5e7eb;
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            --bg-body: #111827; /* gray-900 */
+            --bg-card: #1f2937; /* gray-800 */
+            --bg-input: #374151; /* gray-700 */
+            --bg-highlight: #374151; /* gray-700 */
+            --text-default: #f9fafb; /* gray-50 */
+            --text-secondary: #d1d5db; /* gray-400 */
+            --border-color: #374151; /* gray-700 */
+        }
+
+        /* Aplica as variáveis de forma global */
+        .theme-body-bg { background-color: var(--bg-body) !important; }
+        .theme-card-bg { background-color: var(--bg-card) !important; color: var(--text-default) !important; border-color: var(--border-color) !important; }
+        .theme-input { background-color: var(--bg-input) !important; border-color: var(--border-color) !important; color: var(--text-default) !important; }
+        .theme-label { color: var(--text-secondary) !important; }
+        .theme-highlight-bg { background-color: var(--bg-highlight) !important; }
+
+        /* Garante que o conteúdo não seja cortado por causa do menu lateral */
+        .content-shift { transition: margin-left 0.3s ease-in-out; }
+
+        /* Estilos do menu lateral e botão de fechar */
+        #close-menu-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 60;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 9999px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        #menu-toggle-btn {
+            background-color: #f97316; /* orange-600 */
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        #quinzena-history-menu {
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+    </style>
+</head>
+<body class="p-0 sm:p-0 theme-body-bg">
+    <!-- Botão para Abrir Menu Lateral (Fixo) -->
+    <button id="menu-toggle-btn" class="fixed top-4 left-4 z-40 transition duration-300 hover:bg-orange-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+    
+    <!-- MENU LATERAL RETRÁTIL (Histórico Quinzenal) -->
+    <div id="quinzena-history-menu" class="fixed top-0 left-0 w-80 bg-gray-800 text-white shadow-xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out p-4 flex flex-col">
+        
+        <button id="close-menu-btn" title="Fechar Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        
+        <h2 class="text-2xl font-bold mt-12 mb-4 text-orange-300">Histórico de Ganhos</h2>
+        <p class="text-sm text-gray-400 mb-6">Relatórios organizados por quinzena.</p>
+
+        <div id="quinzena-summary-list" class="space-y-4 flex-grow overflow-y-auto pr-2">
+            <!-- Os cards de resumo das quinzenas serão inseridos aqui -->
+            <p class="text-gray-400 text-center p-8" id="loading-quinzena">Carregando histórico...</p>
+        </div>
+
+        <!-- NOVO: BOTÃO DE TEMA (FUNDO DO MENU) -->
+        <div class="mt-auto pt-4 border-t border-gray-700/50">
+            <h3 class="text-sm font-semibold mb-2 text-gray-300">Aparência</h3>
+            <button id="theme-toggle-btn" class="w-full py-2 px-4 bg-orange-500 hover:bg-orange-400 text-white rounded-lg transition duration-200 flex items-center justify-center space-x-2">
+                <!-- Ícone e texto serão atualizados pelo JS -->
+                <svg id="theme-icon" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span id="theme-text">Modo Claro</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="main-content" class="p-4 sm:p-8 content-shift">
+        <div class="max-w-4xl mx-auto">
+            <!-- Cabeçalho Principal -->
+            <header class="mb-8">
+                <!-- Título e Ícone Atualizados -->
+                <h1 class="4xl font-extrabold text-gray-900 mb-2 theme-label">🛵 Controle de Ganhos</h1>
+                <p class="text-gray-600 theme-label">Registe as contagens diárias para calcular o seu ganho acumulado.</p>
+                <div id="user-info" class="mt-4 p-3 bg-orange-100 text-orange-800 rounded-lg shadow-sm text-sm font-medium">
+                    Aguardando autenticação...
+                </div>
+            </header>
+
+            <!-- DASHBOARD DE RESUMO (ACUMULADO TOTAL) -->
+            <div class="bg-orange-600 text-white p-6 rounded-xl shadow-lg mb-8">
+                <h2 class="text-xl font-semibold mb-2">Total Líquido Acumulado (Geral)</h2>
+                <p id="total-net-accumulated" class="text-5xl font-extrabold">R$ 0,00</p>
+                <div class="text-orange-200 mt-2 text-sm flex justify-between">
+                    <span id="gross-total-summary">Bruto: R$ 0,00</span>
+                    <span id="expense-total-summary">Despesas: R$ 0,00</span>
+                </div>
+            </div>
+
+            <!-- Formulário para Registrar o Dia -->
+            <div id="form-card" class="theme-card-bg p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+                <h2 class="text-2xl font-semibold mb-4 theme-label">Registo Diário de Entregas e Gastos</h2>
+                <form id="daily-entry-form" class="space-y-4">
+                    
+                    <!-- Seletor de Data -->
+                    <div>
+                        <label for="entryDate" class="block text-sm font-medium mb-1 theme-label">Selecione o Dia</label>
+                        <input type="date" id="entryDate" required class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                    </div>
+                    
+                    <!-- GRUPO DE ENTREGAS -->
+                    <div class="grid grid-cols-2 gap-4 pt-2 border-t theme-label" style="border-color: var(--border-color) !important;">
+                        <div>
+                            <label for="flashCount" class="block text-sm font-medium mb-1 theme-label">Flash Normal (R$ 1,70)</label>
+                            <input type="number" id="flashCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+                        <div>
+                            <label for="flashExpressCount" class="block text-sm font-medium mb-1 theme-label">Flash Expresso (R$ 2,10)</label>
+                            <input type="number" id="flashExpressCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="interlogCount" class="block text-sm font-medium mb-1 theme-label">Interlog Normal (R$ 1,50)</label>
+                            <input type="number" id="interlogCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+                        <div>
+                            <label for="interlogExpressCount" class="block text-sm font-medium mb-1 theme-label">Interlog Expresso (R$ 2,00)</label>
+                            <input type="number" id="interlogExpressCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="ecommerceCount" class="block text-sm font-medium mb-1 theme-label">Ecommerce (R$ 3,00)</label>
+                            <input type="number" id="ecommerceCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+                        <div>
+                            <label for="loggiCount" class="block text-sm font-medium mb-1 theme-label">Loggi Paga (R$ 2,50)</label>
+                            <input type="number" id="loggiCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+                    </div>
+                    
+                    <p class="text-center text-lg font-bold p-3 rounded-lg theme-highlight-bg theme-label">Ganho Estimado BRUTO do Dia: <span id="daily-estimated-earning" class="theme-label">R$ 0,00</span></p>
+
+                    <!-- Campo de Despesa Diária -->
+                    <div class="pt-4 border-t" style="border-color: var(--border-color) !important;">
+                        <label for="dailyExpense" class="block text-sm font-medium mb-1 theme-label">Gasto com Combustível (R$)</label>
+                        <input type="number" id="dailyExpense" min="0" step="0.01" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 px-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-md transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
+                        Salvar Registo Diário
+                    </button>
+                </form>
+            </div>
+
+            <!-- Modal de Erro -->
+            <div id="error-modal" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center hidden" onclick="this.classList.add('hidden')">
+                <div class="theme-card-bg p-6 rounded-lg shadow-2xl max-w-sm w-full transform transition-all" onclick="event.stopPropagation()">
+                    <h3 class="text-xl font-bold text-red-600 mb-3">Erro na Aplicação</h3>
+                    <p id="error-message" class="text-gray-700 mb-4 theme-label"></p>
+                    <button onclick="document.getElementById('error-modal').classList.add('hidden')" class="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700">Fechar</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Botão Flutuante do WhatsApp -->
+    <a href="https://wa.me/5582981467725?text=Ol%C3%A1%21%20Gostaria%20de%20falar%20sobre%20o%20controle%20de%20entregas." 
+       target="_blank" 
+       class="fixed bottom-6 right-6 z-40 p-4 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition duration-300 transform hover:scale-105"
+       title="Fale comigo no WhatsApp">
+        <!-- Ícone do WhatsApp (usando SVG) -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M.057 24l1.687-6.155A7.47 7.47 0 010 12C0 5.373 5.373 0 12 0s12 5.373 12 12-5.373 12-12 12c-2.42 0-4.64-.71-6.533-1.957L.057 24zm6.65-3.328l.192.355a9.96 9.96 0 0014.288-14.073c4.015 3.96 4.015 10.4 0 14.364A9.95 9.95 0 016.707 20.672zM18.89 15.658c-.3-.15-.758-.37-1.107-.435s-.703-.098-1.002.392c-.3 1.055-.48 1.272-.647 1.458-.167.186-.33.208-.616.086s-1.22-.45-2.327-1.432c-.86-1.125-1.425-2.18-1.59-2.45-.166-.27-.018-.415.13-.55.122-.115.27-.3.407-.48.136-.18.18-.32.27-.55.088-.23.045-.43.023-.65s-.205-.57-.406-.827c-.2-.257-.407-.18-.55-.18-.143 0-.306-.02-.47-.02-.164 0-.427.058-.65.29s-.87.85-1.05 1.02-.375.27-.597.55c-.222.28-.48.56-.703.782-.222.222-.45 0-.825-.975s-.622-1.89-.887-2.58c-.26-.69-1.028-.86-1.457-.86-.43 0-.923.064-1.28.064-.356 0-.93.08-1.397.712s-1.8 1.75-1.8 4.275c0 2.525 1.84 4.887 2.09 5.147s3.6.86 7.025.75c3.425-.11 6.357-2.67 6.84-5.22.484-2.55.32-4.54-.154-4.795z"/>
+        </svg>
+    </a>
+
+    <!-- Bloco de Script JavaScript (Lógica da Aplicação e Firestore) -->
+    <script type="module">
+        // Importa as funções necessárias do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variáveis globais de ambiente (MANDATÓRIO usar estas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth, userId = null;
+        let isAuthReady = false; 
+        
+        // NOVO: Armazena os últimos registos carregados para edição
+        let currentEntries = []; 
+        
+        // Ativar logs do Firestore para ajudar na depuração
+        setLogLevel('debug');
+        
+        // PREÇOS DAS ENTREGAS (CONSTANTES)
+        const PRICES = {
+            flashCount: 1.70,
+            interlogCount: 1.50,
+            ecommerceCount: 3.00,
+            loggiCount: 2.50,
+            flashExpressCount: 2.10, 
+            interlogExpressCount: 2.00 
+        };
+        const CATEGORY_NAMES = {
+            flashCount: 'Flash Normal',
+            flashExpressCount: 'Flash Expresso',
+            interlogCount: 'Interlog Normal',
+            interlogExpressCount: 'Interlog Expresso',
+            ecommerceCount: 'Ecommerce',
+            loggiCount: 'Loggi Paga'
+        };
+        const COUNT_KEYS = Object.keys(PRICES);
+
+        // Elementos do DOM
+        const bodyEl = document.body; 
+        const formEl = document.getElementById('daily-entry-form');
+        const dateInput = document.getElementById('entryDate');
+        const dailyExpenseInput = document.getElementById('dailyExpense'); 
+        const dailyEstimatedEarningEl = document.getElementById('daily-estimated-earning');
+        
+        const totalNetAccumulatedEl = document.getElementById('total-net-accumulated'); 
+        const grossTotalSummaryEl = document.getElementById('gross-total-summary'); 
+        const expenseTotalSummaryEl = document.getElementById('expense-total-summary'); 
+
+        const quinzenaSummaryListEl = document.getElementById('quinzena-summary-list');
+        const loadingQuinzenaEl = document.getElementById('loading-quinzena');
+        const userInfoEl = document.getElementById('user-info');
+        const errorModalEl = document.getElementById('error-modal');
+        const errorMessageEl = document.getElementById('error-message');
+
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const quinzenaHistoryMenuEl = document.getElementById('quinzena-history-menu');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn'); 
+        const themeIconEl = document.getElementById('theme-icon'); 
+        const themeTextEl = document.getElementById('theme-text'); 
+
+        
+        // Utilitários
+        const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        const intFormatter = new Intl.NumberFormat('pt-BR');
+
+        // Função para mostrar erros (modal)
+        function showError(message) {
+            console.error("Erro na Aplicação:", message);
+            errorMessageEl.textContent = message;
+            errorModalEl.classList.remove('hidden');
+        }
+
+        // --- LÓGICA DO TEMA ---
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                bodyEl.classList.add('dark-mode');
+                themeTextEl.textContent = 'Modo Escuro';
+                // Ícone da Lua
+                themeIconEl.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`;
+            } else {
+                bodyEl.classList.remove('dark-mode');
+                themeTextEl.textContent = 'Modo Claro';
+                // Ícone do Sol
+                themeIconEl.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />`;
+            }
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = bodyEl.classList.contains('dark-mode') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+
+        // 1. Configuração e Autenticação do Firebase
+        async function setupFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                     console.error("Configuração do Firebase ausente.");
+                     userInfoEl.textContent = "Erro: Configuração do Firebase não encontrada.";
+                     return;
+                }
+                
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                await new Promise((resolve) => {
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
+                        } else {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        }
+                        isAuthReady = true;
+                        resolve();
+                    });
+                });
+
+            } catch (error) {
+                showError(`Falha na inicialização do Firebase: ${error.message}`);
+            }
+        }
+        
+        // 2. Caminho da Coleção (Privada do Utilizador)
+        function getEntriesCollectionRef() {
+            if (!db || !userId) {
+                throw new Error("Firestore ou ID do utilizador não estão prontos.");
+            }
+            return collection(db, `artifacts/${appId}/users/${userId}/daily_earnings`);
+        }
+
+        // 3. Função de Cálculo (Ganho Bruto)
+        function calculateDailyEarnings(counts) {
+            let total = 0;
+            COUNT_KEYS.forEach(key => {
+                total += (counts[key] || 0) * PRICES[key];
+            });
+            return total;
+        }
+        
+        // 4. Lógica de Quinzena
+        function identifyQuinzena(dateString) {
+            const [year, month, day] = dateString.split('-').map(Number);
+            const q = day <= 15 ? 'Q1' : 'Q2';
+            const paddedMonth = String(month).padStart(2, '0');
+            return `${year}-${paddedMonth}-${q}`;
+        }
+        
+        function getQuinzenaName(quinzenaId) {
+            const parts = quinzenaId.split('-');
+            const year = parts[0];
+            const month = new Date(year, parseInt(parts[1]) - 1, 1).toLocaleString('pt-BR', { month: 'long' });
+            const q = parts[2] === 'Q1' ? '1ª Quinzena' : '2ª Quinzena';
+            return `${q} de ${month} de ${year}`;
+        }
+
+        // 5. Processamento e Agregação de Dados por Quinzena
+        function processEntries(entries) {
+            const quinzenaMap = {};
+            let totalGrossAccumulated = 0;
+            let totalExpenseAccumulated = 0;
+
+            entries.forEach(entry => {
+                const quinzenaId = identifyQuinzena(entry.date);
+                
+                if (!quinzenaMap[quinzenaId]) {
+                    quinzenaMap[quinzenaId] = {
+                        quinzenaId,
+                        dailyEntries: [], 
+                        totalGross: 0,
+                        totalExpense: 0,
+                        totalDeliveries: 0,
+                        categoryTotals: COUNT_KEYS.reduce((acc, key) => ({
+                            ...acc,
+                            [key]: { count: 0, value: 0 }
+                        }), {}),
+                    };
+                }
+
+                const qData = quinzenaMap[quinzenaId];
+                
+                qData.dailyEntries.push(entry);
+                
+                const expense = entry.dailyExpense || 0;
+                qData.totalGross += entry.totalEarnings;
+                qData.totalExpense += expense;
+                totalGrossAccumulated += entry.totalEarnings;
+                totalExpenseAccumulated += expense;
+
+                COUNT_KEYS.forEach(key => {
+                    const count = entry[key] || 0;
+                    const value = count * PRICES[key];
+                    
+                    qData.categoryTotals[key].count += count;
+                    qData.categoryTotals[key].value += value;
+                    qData.totalDeliveries += count;
+                });
+            });
+
+            Object.values(quinzenaMap).forEach(qData => {
+                qData.dailyEntries.sort((a, b) => a.date.localeCompare(b.date)); 
+            });
+
+            const quinzenaSummaries = Object.values(quinzenaMap).sort((a, b) => b.quinzenaId.localeCompare(a.quinzenaId));
+
+            return { quinzenaSummaries, totalGrossAccumulated, totalExpenseAccumulated };
+        }
+
+
+        // 6. Renderização do Menu Lateral e Resumo Geral
+        function renderDashboard(data) {
+            const { quinzenaSummaries, totalGrossAccumulated, totalExpenseAccumulated } = data;
+            
+            // 6.1 Atualiza o Dashboard Geral
+            const totalNet = totalGrossAccumulated - totalExpenseAccumulated;
+            totalNetAccumulatedEl.textContent = formatter.format(totalNet);
+            grossTotalSummaryEl.textContent = `Bruto: ${formatter.format(totalGrossAccumulated)}`;
+            expenseTotalSummaryEl.textContent = `Despesas: ${formatter.format(totalExpenseAccumulated)}`;
+            
+            // 6.2 Renderiza o Histórico Quinzenal
+            quinzenaSummaryListEl.innerHTML = '';
+            loadingQuinzenaEl.classList.add('hidden');
+            
+            if (quinzenaSummaries.length === 0) {
+                quinzenaSummaryListEl.innerHTML = '<p class="text-center text-gray-400 p-6">Nenhum histórico encontrado. Comece a registrar os dias!</p>';
+                return;
+            }
+
+            quinzenaSummaries.forEach(qData => {
+                const quinzenaTitle = getQuinzenaName(qData.quinzenaId);
+                const totalNetQuinzena = qData.totalGross - qData.totalExpense;
+                const isPositive = totalNetQuinzena >= 0;
+
+                const cardHtml = `
+                    <div class="bg-gray-700 rounded-lg shadow-lg overflow-hidden">
+                        <button class="w-full text-left p-4 flex justify-between items-center transition duration-200 hover:bg-gray-600 focus:outline-none" 
+                                data-toggle="quinzena-details-${qData.quinzenaId}">
+                            <div>
+                                <h3 class="font-bold text-lg text-white">${quinzenaTitle}</h3>
+                                <p class="text-sm ${isPositive ? 'text-green-400' : 'text-red-400'} mt-1">
+                                    LÍQUIDO: ${formatter.format(totalNetQuinzena)}
+                                </p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-300 transform transition-transform" data-arrow="${qData.quinzenaId}" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div id="quinzena-details-${qData.quinzenaId}" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out bg-gray-900/50">
+                            <div class="p-4 border-t border-gray-700">
+                                <!-- Resumo da Quinzena (Totais) -->
+                                <div class="bg-gray-800 p-3 rounded-lg text-sm mb-4">
+                                    <p class="font-bold text-orange-400 mb-2">Resumo da Quinzena:</p>
+                                    <div class="flex justify-between border-b border-gray-700 pb-1 mb-1">
+                                        <span>Total Entregas:</span>
+                                        <span class="font-semibold text-white">${intFormatter.format(qData.totalDeliveries)}</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-gray-700 pb-1 mb-1">
+                                        <span>Total Bruto:</span>
+                                        <span class="font-semibold text-green-400">${formatter.format(qData.totalGross)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Total Despesas:</span>
+                                        <span class="font-semibold text-red-400">${formatter.format(qData.totalExpense)}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Detalhes por Categoria -->
+                                <p class="font-bold text-orange-400 mb-2 text-sm">Totais por Categoria:</p>
+                                <div class="space-y-1 text-xs">
+                                    ${COUNT_KEYS.map(key => {
+                                        const total = qData.categoryTotals[key].value;
+                                        const count = qData.categoryTotals[key].count;
+                                        if (count === 0) return '';
+                                        return `
+                                            <div class="flex justify-between text-gray-300">
+                                                <span>${CATEGORY_NAMES[key]} (${count} un.):</span>
+                                                <span class="font-semibold">${formatter.format(total)}</span>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                                
+                                <!-- Histórico Diário (Diário) -->
+                                <p class="font-bold text-orange-400 mt-6 mb-2 text-sm border-t border-gray-700 pt-3">Entradas Diárias:</p>
+                                <div class="space-y-3">
+                                    ${qData.dailyEntries.map(entry => {
+                                        const dailyNet = entry.totalEarnings - (entry.dailyExpense || 0);
+                                        const isDayPositive = dailyNet >= 0;
+                                        return `
+                                            <div class="bg-gray-700/70 p-3 rounded-lg flex justify-between items-center">
+                                                <div class="flex-grow">
+                                                    <p class="text-sm font-semibold text-gray-300">${formatDateDisplay(entry.date)}</p>
+                                                    <p class="text-lg font-extrabold ${isDayPositive ? 'text-green-300' : 'text-red-300'}">
+                                                        ${formatter.format(dailyNet)}
+                                                    </p>
+                                                </div>
+                                                <div class="text-xs text-right">
+                                                    <p class="text-gray-400">Bruto: ${formatter.format(entry.totalEarnings)}</p>
+                                                    <p class="text-red-400 mb-1">Despesa: ${formatter.format(entry.dailyExpense || 0)}</p>
+                                                    
+                                                    <!-- BOTÕES DE EDIÇÃO E EXCLUSÃO (NOVO) -->
+                                                    <div class="flex space-x-2 justify-end">
+                                                        <button data-doc-id="${entry.date}" class="edit-btn text-xs text-orange-400 hover:text-orange-300 transition duration-150" title="Editar o registo do dia">
+                                                            [Editar Dia]
+                                                        </button>
+                                                        <button data-doc-id="${entry.date}" class="delete-btn text-xs text-red-500 hover:text-red-300 transition duration-150" title="Excluir o registo do dia">
+                                                            [Excluir Dia]
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                quinzenaSummaryListEl.insertAdjacentHTML('beforeend', cardHtml);
+            });
+            
+            setupQuinzenaToggleListeners();
+            setupDailyEntryListeners(); // CHAMA O NOVO OUVINTE
+        }
+
+        // Função utilitária para formatar a data
+        function formatDateDisplay(dateString) {
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        
+        // Função para alternar o menu lateral
+        function toggleMenu() {
+            const isOpen = quinzenaHistoryMenuEl.classList.toggle('-translate-x-full');
+        }
+
+        // Configura ouvintes para o toggle do menu
+        function setupMenuToggleListeners() {
+            menuToggleBtn.addEventListener('click', () => {
+                quinzenaHistoryMenuEl.classList.remove('-translate-x-full');
+            });
+            closeMenuBtn.addEventListener('click', () => {
+                quinzenaHistoryMenuEl.classList.add('-translate-x-full');
+            });
+        }
+        
+        // Configura ouvintes para expandir/colapsar os cards de quinzena
+        function setupQuinzenaToggleListeners() {
+            document.querySelectorAll('[data-toggle]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const targetId = e.currentTarget.dataset.toggle;
+                    const targetEl = document.getElementById(targetId);
+                    const arrowEl = e.currentTarget.querySelector('[data-arrow]');
+
+                    if (targetEl.classList.contains('max-h-0')) {
+                        // Abrir: define a altura para 'auto' no final da transição
+                        targetEl.classList.remove('max-h-0');
+                        targetEl.style.maxHeight = targetEl.scrollHeight + "px";
+                        arrowEl.classList.add('rotate-180');
+                    } else {
+                        // Fechar: define a altura de volta para 0
+                        targetEl.style.maxHeight = '0';
+                        targetEl.classList.add('max-h-0');
+                        arrowEl.classList.remove('rotate-180');
+                    }
+                });
+            });
+        }
+
+        // NOVO: Função para carregar dados para edição
+        async function loadEntryForEditing(date) {
+            const entry = currentEntries.find(e => e.date === date);
+
+            if (!entry) {
+                showError(`Registo para o dia ${formatDateDisplay(date)} não encontrado na memória.`);
+                return;
+            }
+
+            // 1. Preencher a data
+            dateInput.value = date;
+
+            // 2. Preencher contagens e despesas
+            COUNT_KEYS.forEach(key => {
+                // Usa valor, ou vazio se for zero, para o placeholder funcionar
+                document.getElementById(key).value = entry[key] || ''; 
+            });
+            dailyExpenseInput.value = entry.dailyExpense || '';
+
+            // 3. Recalcular e exibir o ganho estimado
+            const counts = COUNT_KEYS.reduce((acc, key) => {
+                acc[key] = entry[key] || 0;
+                return acc;
+            }, {});
+            const estimated = calculateDailyEarnings(counts);
+            dailyEstimatedEarningEl.textContent = formatter.format(estimated);
+
+            // 4. Fechar o menu e rolar para o formulário
+            quinzenaHistoryMenuEl.classList.add('-translate-x-full');
+            document.getElementById('form-card').scrollIntoView({ behavior: 'smooth' });
+
+            userInfoEl.textContent = `A editar registo para o dia: ${formatDateDisplay(date)}. Clique em "Salvar" para atualizar.`;
+            
+            // Timeout para limpar a mensagem
+            setTimeout(() => {
+                userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
+            }, 5000);
+        }
+        
+        // NOVO: Configura ouvintes para edição e exclusão de dias
+        function setupDailyEntryListeners() {
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const docId = e.target.dataset.docId;
+                    deleteDailyEntry(docId);
+                });
+            });
+            
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const docId = e.target.dataset.docId;
+                    loadEntryForEditing(docId);
+                });
+            });
+        }
+
+
+        // 7. Ouvinte de Dados em Tempo Real (onSnapshot)
+        function subscribeToDailyEntries() {
+            if (!isAuthReady || !db || !userId) {
+                setTimeout(subscribeToDailyEntries, 500);
+                return;
+            }
+
+            try {
+                const q = query(getEntriesCollectionRef());
+
+                onSnapshot(q, (snapshot) => {
+                    const entries = [];
+                    snapshot.forEach((doc) => {
+                        entries.push({ date: doc.id, ...doc.data() });
+                    });
+                    
+                    // ATUALIZA A VARIÁVEL GLOBAL PARA EDIÇÃO
+                    currentEntries = entries; 
+                    
+                    const processedData = processEntries(entries);
+                    renderDashboard(processedData); 
+
+                }, (error) => {
+                    showError("Erro ao receber atualizações em tempo real: " + error.message);
+                });
+
+            } catch (error) {
+                 showError(`Erro ao tentar conectar ao Firestore: ${error.message}`);
+            }
+        }
+        
+        // 8. Função para Salvar um Registo Diário 
+        async function saveDailyEntry(date, counts, totalEarnings, dailyExpense) {
+            try {
+                const docRef = doc(getEntriesCollectionRef(), date); 
+                
+                await setDoc(docRef, {
+                    ...counts, 
+                    totalEarnings: parseFloat(totalEarnings.toFixed(2)),
+                    dailyExpense: parseFloat(dailyExpense.toFixed(2)), 
+                    savedAt: new Date().toISOString()
+                });
+                
+                formEl.reset();
+                dailyEstimatedEarningEl.textContent = formatter.format(0);
+                dateInput.valueAsDate = new Date(); 
+
+                userInfoEl.textContent = `Registo para o dia ${formatDateDisplay(date)} salvo/atualizado com sucesso!`;
+                setTimeout(() => {
+                    userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
+                }, 3000);
+
+            } catch (error) {
+                showError("Falha ao salvar o registo diário: " + error.message);
+            }
+        }
+        
+        // 9. Função para Excluir um Registo Diário
+        async function deleteDailyEntry(docId) {
+            try {
+                const docRef = doc(getEntriesCollectionRef(), docId);
+                await deleteDoc(docRef);
+                userInfoEl.textContent = `Registo do dia ${formatDateDisplay(docId)} excluído com sucesso!`;
+                setTimeout(() => {
+                    userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
+                }, 3000);
+            } catch (error) {
+                showError("Falha ao excluir o registo: " + error.message);
+            }
+        }
+
+        // 10. Event Listener para o Formulário e Inputs
+        function setupEventListeners() {
+            dateInput.valueAsDate = new Date();
+            
+            const inputIds = [...COUNT_KEYS, 'dailyExpense'];
+            inputIds.forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    const counts = COUNT_KEYS.reduce((acc, currentId) => {
+                        acc[currentId] = parseInt(document.getElementById(currentId).value, 10) || 0;
+                        return acc;
+                    }, {});
+                    const estimated = calculateDailyEarnings(counts);
+                    dailyEstimatedEarningEl.textContent = formatter.format(estimated);
+                });
+            });
+
+            formEl.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const date = dateInput.value; 
+                if (!date) { showError("Por favor, selecione uma data válida."); return; } 
+
+                const counts = COUNT_KEYS.reduce((acc, currentId) => {
+                    acc[currentId] = parseInt(document.getElementById(currentId).value, 10) || 0;
+                    return acc;
+                }, {});
+
+                const dailyExpenseValue = dailyExpenseInput.value.trim();
+                const dailyExpense = dailyExpenseValue ? parseFloat(dailyExpenseValue) : 0; 
+                
+                if (Object.values(counts).every(c => c === 0) && dailyExpense === 0) {
+                    showError("Por favor, insira a quantidade de entregas ou um valor de despesa.");
+                    return;
+                }
+                
+                const totalEarnings = calculateDailyEarnings(counts);
+                
+                saveDailyEntry(date, counts, totalEarnings, dailyExpense);
+            });
+            
+            // Ouvinte de Evento do Botão de Tema
+            themeToggleBtn.addEventListener('click', toggleTheme);
+        }
+
+
+        // 11. Inicialização
+        window.addEventListener('load', async () => {
+            loadTheme(); // Carrega o tema antes da inicialização do Firebase
+            await setupFirebase();
+            setupEventListeners();
+            setupMenuToggleListeners();
+            subscribeToDailyEntries();
+        });
+
+    </script>
+</body>
+</html>
