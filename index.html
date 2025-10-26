@@ -633,33 +633,43 @@
                                         }).join('');
                                         
                                         return `
-                                            <div class="bg-gray-700/70 p-3 rounded-lg flex justify-between items-start">
-                                                <div class="flex-grow">
-                                                    <p class="text-sm font-semibold text-gray-300 mb-2">${formatDateDisplay(entry.date)}</p>
-                                                    <p class="text-lg font-extrabold ${isDayPositive ? 'text-green-300' : 'text-red-300'}">
+                                            <div class="bg-gray-700/70 p-3 rounded-lg space-y-2">
+                                                <!-- Linha 1: Data e Líquido -->
+                                                <div class="flex justify-between items-center pb-2 border-b border-gray-600/50">
+                                                    <p class="text-base font-bold text-gray-300">${formatDateDisplay(entry.date)}</p>
+                                                    <p class="text-xl font-extrabold ${isDayPositive ? 'text-green-300' : 'text-red-300'}">
                                                         ${formatter.format(dailyNet)}
                                                     </p>
                                                 </div>
-                                                <div class="text-xs text-right w-1/2">
-                                                    <p class="text-gray-400">Bruto: ${formatter.format(entry.totalEarnings)}</p>
-                                                    <p class="text-red-400 mb-1">Despesa: ${formatter.format(entry.dailyExpense || 0)}</p>
-                                                    
-                                                    <div class="mt-2 pt-2 border-t border-gray-600">
-                                                        <p class="font-bold text-orange-400">Total Entregas: ${intFormatter.format(totalDeliveriesDay)}</p>
-                                                        <div class="text-gray-300 space-y-0.5 mt-1 text-left">
-                                                            ${categoryDetailsHtml}
-                                                        </div>
-                                                    </div>
 
-                                                    <!-- BOTÕES DE EDIÇÃO E EXCLUSÃO -->
-                                                    <div class="flex space-x-2 justify-end mt-2">
-                                                        <button data-doc-id="${entry.date}" class="edit-btn text-xs text-orange-400 hover:text-orange-300 transition duration-150" title="Editar o registo do dia">
-                                                            [Editar Dia]
-                                                        </button>
-                                                        <button data-doc-id="${entry.date}" class="delete-btn text-xs text-red-500 hover:text-red-300 transition duration-150" title="Excluir o registo do dia">
-                                                            [Excluir Dia]
-                                                        </button>
+                                                <!-- Linha 2: Bruto e Despesa -->
+                                                <div class="flex justify-between text-xs pt-1">
+                                                    <div>
+                                                        <span class="text-gray-400">Bruto:</span>
+                                                        <span class="font-semibold text-green-400 ml-1">${formatter.format(entry.totalEarnings)}</span>
                                                     </div>
+                                                    <div>
+                                                        <span class="text-gray-400">Despesa:</span>
+                                                        <span class="font-semibold text-red-400 ml-1">${formatter.format(entry.dailyExpense || 0)}</span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Linha 3: Detalhes das Entregas (Total e Categorias) -->
+                                                <div class="pt-2 border-t border-gray-600/50">
+                                                    <p class="font-bold text-orange-400 text-sm mb-1">Total Entregas: ${intFormatter.format(totalDeliveriesDay)}</p>
+                                                    <div class="text-gray-300 space-y-0.5 text-xs grid grid-cols-2 gap-x-2">
+                                                        ${categoryDetailsHtml}
+                                                    </div>
+                                                </div>
+
+                                                <!-- Linha 4: Botões de Ação -->
+                                                <div class="flex justify-end space-x-3 pt-2 border-t border-gray-600/50">
+                                                    <button data-doc-id="${entry.date}" class="edit-btn text-xs text-orange-400 hover:text-orange-300 transition duration-150" title="Editar o registo do dia">
+                                                        [Editar Dia]
+                                                    </button>
+                                                    <button data-doc-id="${entry.date}" class="delete-btn text-xs text-red-500 hover:text-red-300 transition duration-150" title="Excluir o registo do dia">
+                                                        [Excluir Dia]
+                                                    </button>
                                                 </div>
                                             </div>
                                         `;
@@ -995,7 +1005,6 @@
     </script>
 </body>
 </html>
-
 
 
 
