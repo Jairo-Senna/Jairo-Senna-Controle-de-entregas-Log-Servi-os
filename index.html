@@ -621,20 +621,38 @@
                                     ${qData.dailyEntries.map(entry => {
                                         const dailyNet = entry.totalEarnings - (entry.dailyExpense || 0);
                                         const isDayPositive = dailyNet >= 0;
+                                        
+                                        // Calculate total deliveries for the day
+                                        const totalDeliveriesDay = COUNT_KEYS.reduce((sum, key) => sum + (entry[key] || 0), 0);
+
+                                        // HTML for individual category counts
+                                        const categoryDetailsHtml = COUNT_KEYS.map(key => {
+                                            const count = entry[key] || 0;
+                                            if (count === 0) return '';
+                                            return `<span class="block">${CATEGORY_NAMES[key]}: ${intFormatter.format(count)} un.</span>`;
+                                        }).join('');
+                                        
                                         return `
-                                            <div class="bg-gray-700/70 p-3 rounded-lg flex justify-between items-center">
+                                            <div class="bg-gray-700/70 p-3 rounded-lg flex justify-between items-start">
                                                 <div class="flex-grow">
-                                                    <p class="text-sm font-semibold text-gray-300">${formatDateDisplay(entry.date)}</p>
+                                                    <p class="text-sm font-semibold text-gray-300 mb-2">${formatDateDisplay(entry.date)}</p>
                                                     <p class="text-lg font-extrabold ${isDayPositive ? 'text-green-300' : 'text-red-300'}">
                                                         ${formatter.format(dailyNet)}
                                                     </p>
                                                 </div>
-                                                <div class="text-xs text-right">
+                                                <div class="text-xs text-right w-1/2">
                                                     <p class="text-gray-400">Bruto: ${formatter.format(entry.totalEarnings)}</p>
                                                     <p class="text-red-400 mb-1">Despesa: ${formatter.format(entry.dailyExpense || 0)}</p>
                                                     
+                                                    <div class="mt-2 pt-2 border-t border-gray-600">
+                                                        <p class="font-bold text-orange-400">Total Entregas: ${intFormatter.format(totalDeliveriesDay)}</p>
+                                                        <div class="text-gray-300 space-y-0.5 mt-1 text-left">
+                                                            ${categoryDetailsHtml}
+                                                        </div>
+                                                    </div>
+
                                                     <!-- BOTÕES DE EDIÇÃO E EXCLUSÃO -->
-                                                    <div class="flex space-x-2 justify-end">
+                                                    <div class="flex space-x-2 justify-end mt-2">
                                                         <button data-doc-id="${entry.date}" class="edit-btn text-xs text-orange-400 hover:text-orange-300 transition duration-150" title="Editar o registo do dia">
                                                             [Editar Dia]
                                                         </button>
@@ -977,6 +995,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
