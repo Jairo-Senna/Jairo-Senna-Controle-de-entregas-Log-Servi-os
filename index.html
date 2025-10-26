@@ -72,7 +72,7 @@
 </head>
 <body class="p-0 sm:p-0 theme-body-bg">
     <!-- Botão para Abrir Menu Lateral (Fixo) -->
-    <button id="menu-toggle-btn" class="fixed top-4 left-4 z-40 transition duration-300 hover:bg-orange-700">
+    <button id="menu-toggle-btn" class="fixed top-4 left-4 z-40 transition duration-300 hover:bg-orange-700 hidden">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
@@ -95,8 +95,18 @@
             <p class="text-gray-400 text-center p-8" id="loading-quinzena">Carregando histórico...</p>
         </div>
 
-        <!-- NOVO: BOTÃO DE TEMA (FUNDO DO MENU) -->
-        <div class="mt-auto pt-4 border-t border-gray-700/50">
+        <!-- Botão de Sair (Logout) -->
+        <div class="mt-4 pt-4 border-t border-gray-700/50">
+            <button id="logout-btn" class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3v-3m0-4V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Sair (Logout)</span>
+            </button>
+        </div>
+
+        <!-- BOTÃO DE TEMA (FUNDO DO MENU) -->
+        <div class="mt-4 pt-4 border-t border-gray-700/50">
             <h3 class="text-sm font-semibold mb-2 text-gray-300">Aparência</h3>
             <button id="theme-toggle-btn" class="w-full py-2 px-4 bg-orange-500 hover:bg-orange-400 text-white rounded-lg transition duration-200 flex items-center justify-center space-x-2">
                 <!-- Ícone e texto serão atualizados pelo JS -->
@@ -109,86 +119,144 @@
 
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <div id="main-content" class="p-4 sm:p-8 content-shift">
+    <!-- CONTEÚDO PRINCIPAL (Inclui Login e Dashboard) -->
+    <div class="p-4 sm:p-8">
         <div class="max-w-4xl mx-auto">
-            <!-- Cabeçalho Principal -->
-            <header class="mb-8">
-                <!-- Título e Ícone Atualizados -->
-                <h1 class="4xl font-extrabold text-gray-900 mb-2 theme-label">🛵 Controle de Ganhos</h1>
-                <p class="text-gray-600 theme-label">Registe as contagens diárias para calcular o seu ganho acumulado.</p>
-                <div id="user-info" class="mt-4 p-3 bg-orange-100 text-orange-800 rounded-lg shadow-sm text-sm font-medium">
-                    Aguardando autenticação...
-                </div>
-            </header>
-
-            <!-- DASHBOARD DE RESUMO (ACUMULADO TOTAL) -->
-            <div class="bg-orange-600 text-white p-6 rounded-xl shadow-lg mb-8">
-                <h2 class="text-xl font-semibold mb-2">Total Líquido Acumulado (Geral)</h2>
-                <p id="total-net-accumulated" class="text-5xl font-extrabold">R$ 0,00</p>
-                <div class="text-orange-200 mt-2 text-sm flex justify-between">
-                    <span id="gross-total-summary">Bruto: R$ 0,00</span>
-                    <span id="expense-total-summary">Despesas: R$ 0,00</span>
-                </div>
-            </div>
-
-            <!-- Formulário para Registrar o Dia -->
-            <div id="form-card" class="theme-card-bg p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
-                <h2 class="text-2xl font-semibold mb-4 theme-label">Registo Diário de Entregas e Gastos</h2>
-                <form id="daily-entry-form" class="space-y-4">
-                    
-                    <!-- Seletor de Data -->
+            
+            <!-- ---------------------------------------------------- -->
+            <!-- SECÇÃO DE AUTENTICAÇÃO (Visível por padrão) -->
+            <!-- ---------------------------------------------------- -->
+            <div id="auth-container" class="max-w-md mx-auto mt-16 p-8 theme-card-bg rounded-xl shadow-2xl border border-gray-200">
+                <h1 class="text-3xl font-bold mb-6 text-center theme-label">Entrar ou Criar Conta</h1>
+                
+                <!-- Formulário de Login/Registo com Email e Senha -->
+                <form id="email-auth-form" class="space-y-4">
                     <div>
-                        <label for="entryDate" class="block text-sm font-medium mb-1 theme-label">Selecione o Dia</label>
-                        <input type="date" id="entryDate" required class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        <label for="email" class="block text-sm font-medium mb-1 theme-label">Email</label>
+                        <input type="email" id="email" required class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium mb-1 theme-label">Senha</label>
+                        <input type="password" id="password" required class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
                     </div>
                     
-                    <!-- GRUPO DE ENTREGAS -->
-                    <div class="grid grid-cols-2 gap-4 pt-2 border-t theme-label" style="border-color: var(--border-color) !important;">
-                        <div>
-                            <label for="flashCount" class="block text-sm font-medium mb-1 theme-label">Flash Normal (R$ 1,70)</label>
-                            <input type="number" id="flashCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
-                        </div>
-                        <div>
-                            <label for="flashExpressCount" class="block text-sm font-medium mb-1 theme-label">Flash Expresso (R$ 2,10)</label>
-                            <input type="number" id="flashExpressCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="interlogCount" class="block text-sm font-medium mb-1 theme-label">Interlog Normal (R$ 1,50)</label>
-                            <input type="number" id="interlogCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
-                        </div>
-                        <div>
-                            <label for="interlogExpressCount" class="block text-sm font-medium mb-1 theme-label">Interlog Expresso (R$ 2,00)</label>
-                            <input type="number" id="interlogExpressCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="ecommerceCount" class="block text-sm font-medium mb-1 theme-label">Ecommerce (R$ 3,00)</label>
-                            <input type="number" id="ecommerceCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
-                        </div>
-                        <div>
-                            <label for="loggiCount" class="block text-sm font-medium mb-1 theme-label">Loggi Paga (R$ 2,50)</label>
-                            <input type="number" id="loggiCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
-                        </div>
-                    </div>
-                    
-                    <p class="text-center text-lg font-bold p-3 rounded-lg theme-highlight-bg theme-label">Ganho Estimado BRUTO do Dia: <span id="daily-estimated-earning" class="theme-label">R$ 0,00</span></p>
-
-                    <!-- Campo de Despesa Diária -->
-                    <div class="pt-4 border-t" style="border-color: var(--border-color) !important;">
-                        <label for="dailyExpense" class="block text-sm font-medium mb-1 theme-label">Gasto com Combustível (R$)</label>
-                        <input type="number" id="dailyExpense" min="0" step="0.01" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                    <!-- Checkbox Lembrar de Mim -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="rememberMe" class="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 theme-input">
+                        <label for="rememberMe" class="ml-2 block text-sm theme-label">Lembrar de Mim</label>
                     </div>
 
-                    <button type="submit" class="w-full py-3 px-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-md transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
-                        Salvar Registo Diário
+                    <button type="submit" id="sign-in-btn" class="w-full py-3 px-4 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition duration-200">
+                        Entrar (Login)
+                    </button>
+                    <button type="button" id="sign-up-btn" class="w-full py-3 px-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-200">
+                        Criar Conta (Registar)
                     </button>
                 </form>
+
+                <div class="my-6 flex items-center">
+                    <div class="flex-grow border-t border-gray-400 theme-label"></div>
+                    <span class="flex-shrink mx-4 text-gray-500 theme-label text-sm">OU</span>
+                    <div class="flex-grow border-t border-gray-400 theme-label"></div>
+                </div>
+
+                <!-- Botão de Login com Google -->
+                <button type="button" id="google-sign-in-btn" class="w-full py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg shadow-sm hover:bg-gray-100 transition duration-200 flex items-center justify-center space-x-3 theme-card-bg">
+                    <svg class="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M43.61 20.083H24V28.9h11.237c-1.125 3.3-3.475 5.75-6.797 7.55v6.52h8.46c4.965-4.57 7.82-11.385 7.82-19.143 0-1.3-.11-2.58-.33-3.837z" fill="#4285F4"/>
+                        <path d="M24 43.4c6.264 0 11.53-2.078 15.373-5.637l-8.46-6.52c-2.348 1.57-5.342 2.497-8.913 2.497-6.84 0-12.67-4.6-14.77-10.74H.74v6.75C3.89 39.53 13.316 43.4 24 43.4z" fill="#34A853"/>
+                        <path d="M9.23 28.167c-.452-1.34-1.1-2.937-1.1-4.167s.648-2.827 1.1-4.167V13.15H.74c-1.897 3.99-1.897 8.784 0 12.77z" fill="#FBBC05"/>
+                        <path d="M24 4.5c3.55 0 6.64 1.455 9.07 3.587l7.468-7.468C36.035.918 30.205 0 24 0 13.316 0 3.89 3.87 0.74 9.683l8.49 6.75c2.096-6.14 7.93-10.733 14.77-10.733z" fill="#EA4335"/>
+                    </svg>
+                    <span>Entrar com Google</span>
+                </button>
+                
+                <p id="auth-error-message" class="text-sm text-red-500 mt-4 text-center"></p>
+                <p class="text-center text-xs text-gray-500 mt-4 theme-label">O login garante que seus dados sejam salvos na nuvem e acessíveis de qualquer dispositivo.</p>
+            </div>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- DASHBOARD PRINCIPAL (Oculto até o login) -->
+            <!-- ---------------------------------------------------- -->
+            <div id="main-content" class="content-shift hidden">
+                <!-- Cabeçalho Principal -->
+                <header class="mb-8">
+                    <!-- Título e Ícone Atualizados -->
+                    <h1 class="4xl font-extrabold text-gray-900 mb-2 theme-label">🛵 Controle de Ganhos</h1>
+                    <p class="text-gray-600 theme-label">Registe as contagens diárias para calcular o seu ganho acumulado.</p>
+                    <div id="user-info" class="mt-4 p-3 bg-orange-100 text-orange-800 rounded-lg shadow-sm text-sm font-medium">
+                        Aguardando autenticação...
+                    </div>
+                </header>
+
+                <!-- DASHBOARD DE RESUMO (ACUMULADO TOTAL) -->
+                <div class="bg-orange-600 text-white p-6 rounded-xl shadow-lg mb-8">
+                    <h2 class="text-xl font-semibold mb-2">Total Líquido Acumulado (Geral)</h2>
+                    <p id="total-net-accumulated" class="text-5xl font-extrabold">R$ 0,00</p>
+                    <div class="text-orange-200 mt-2 text-sm flex justify-between">
+                        <span id="gross-total-summary">Bruto: R$ 0,00</span>
+                        <span id="expense-total-summary">Despesas: R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Formulário para Registrar o Dia -->
+                <div id="form-card" class="theme-card-bg p-6 rounded-xl shadow-lg mb-8 border border-gray-200">
+                    <h2 class="text-2xl font-semibold mb-4 theme-label">Registo Diário de Entregas e Gastos</h2>
+                    <form id="daily-entry-form" class="space-y-4">
+                        
+                        <!-- Seletor de Data -->
+                        <div>
+                            <label for="entryDate" class="block text-sm font-medium mb-1 theme-label">Selecione o Dia</label>
+                            <input type="date" id="entryDate" required class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+                        
+                        <!-- GRUPO DE ENTREGAS -->
+                        <div class="grid grid-cols-2 gap-4 pt-2 border-t theme-label" style="border-color: var(--border-color) !important;">
+                            <div>
+                                <label for="flashCount" class="block text-sm font-medium mb-1 theme-label">Flash Normal (R$ 1,70)</label>
+                                <input type="number" id="flashCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                            </div>
+                            <div>
+                                <label for="flashExpressCount" class="block text-sm font-medium mb-1 theme-label">Flash Expresso (R$ 2,10)</label>
+                                <input type="number" id="flashExpressCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="interlogCount" class="block text-sm font-medium mb-1 theme-label">Interlog Normal (R$ 1,50)</label>
+                                <input type="number" id="interlogCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                            </div>
+                            <div>
+                                <label for="interlogExpressCount" class="block text-sm font-medium mb-1 theme-label">Interlog Expresso (R$ 2,00)</label>
+                                <input type="number" id="interlogExpressCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="ecommerceCount" class="block text-sm font-medium mb-1 theme-label">Ecommerce (R$ 3,00)</label>
+                                <input type="number" id="ecommerceCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                            </div>
+                            <div>
+                                <label for="loggiCount" class="block text-sm font-medium mb-1 theme-label">Loggi Paga (R$ 2,50)</label>
+                                <input type="number" id="loggiCount" min="0" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                            </div>
+                        </div>
+                        
+                        <p class="text-center text-lg font-bold p-3 rounded-lg theme-highlight-bg theme-label">Ganho Estimado BRUTO do Dia: <span id="daily-estimated-earning" class="theme-label">R$ 0,00</span></p>
+
+                        <!-- Campo de Despesa Diária -->
+                        <div class="pt-4 border-t" style="border-color: var(--border-color) !important;">
+                            <label for="dailyExpense" class="block text-sm font-medium mb-1 theme-label">Gasto com Combustível (R$)</label>
+                            <input type="number" id="dailyExpense" min="0" step="0.01" class="w-full p-3 border rounded-lg focus:ring-orange-500 focus:border-orange-500 transition duration-150 theme-input">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 px-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-200 shadow-md transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50">
+                            Salvar Registo Diário
+                        </button>
+                    </form>
+                </div>
             </div>
 
             <!-- Modal de Erro -->
@@ -218,7 +286,7 @@
     <script type="module">
         // Importa as funções necessárias do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Variáveis de Configuração do Firebase
@@ -287,8 +355,21 @@
         const closeMenuBtn = document.getElementById('close-menu-btn');
         const quinzenaHistoryMenuEl = document.getElementById('quinzena-history-menu');
         const themeToggleBtn = document.getElementById('theme-toggle-btn'); 
-        const themeIconEl = document.getElementById('theme-icon'); 
         const themeTextEl = document.getElementById('theme-text'); 
+        const themeIconEl = document.getElementById('theme-icon'); 
+        
+        // Elementos de Autenticação
+        const authContainerEl = document.getElementById('auth-container');
+        const mainContentEl = document.getElementById('main-content');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+        const signInBtn = document.getElementById('sign-in-btn');
+        const signUpBtn = document.getElementById('sign-up-btn');
+        const googleSignInBtn = document.getElementById('google-sign-in-btn');
+        const authErrorMessageEl = document.getElementById('auth-error-message');
+        const logoutBtn = document.getElementById('logout-btn');
+
 
         
         // Utilitários
@@ -344,22 +425,27 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                await new Promise((resolve) => {
-                    onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            userId = user.uid;
-                            userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
-                        } else {
-                            // No GitHub Pages, o token personalizado não existe, usamos signInAnonymously().
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth); 
-                            }
-                        }
-                        isAuthReady = true;
-                        resolve();
-                    });
+                // Ouve o estado de autenticação para exibir o dashboard ou a tela de login
+                onAuthStateChanged(auth, (user) => {
+                    isAuthReady = true;
+                    if (user) {
+                        userId = user.uid;
+                        authContainerEl.classList.add('hidden');
+                        mainContentEl.classList.remove('hidden');
+                        menuToggleBtn.classList.remove('hidden'); // Exibe o botão do menu
+                        userInfoEl.textContent = `Logado como: ${user.email || 'Usuário Google'}`;
+                        subscribeToDailyEntries(); 
+                    } else {
+                        userId = null;
+                        authContainerEl.classList.remove('hidden');
+                        mainContentEl.classList.add('hidden');
+                        menuToggleBtn.classList.add('hidden'); // Oculta o botão do menu
+                        // Limpa o dashboard quando desloga
+                        quinzenaSummaryListEl.innerHTML = '';
+                        totalNetAccumulatedEl.textContent = formatter.format(0);
+                        grossTotalSummaryEl.textContent = `Bruto: ${formatter.format(0)}`;
+                        expenseTotalSummaryEl.textContent = `Despesas: ${formatter.format(0)}`;
+                    }
                 });
 
             } catch (error) {
@@ -370,8 +456,8 @@
         // 2. Caminho da Coleção (Privada do Utilizador)
         function getEntriesCollectionRef() {
             if (!db || !userId) {
-                // Se a autenticação falhou (ex: credenciais erradas no GH Pages)
-                throw new Error("Firestore ou ID do utilizador não estão prontos. Verifique a configuração do Firebase.");
+                // Se o usuário não estiver logado, não tente acessar o Firestore
+                throw new Error("Usuário não está logado ou Firestore não está pronto.");
             }
             return collection(db, `artifacts/${appId}/users/${userId}/daily_earnings`);
         }
@@ -396,6 +482,7 @@
         function getQuinzenaName(quinzenaId) {
             const parts = quinzenaId.split('-');
             const year = parts[0];
+            // Usamos o mês indexado (0-11)
             const month = new Date(year, parseInt(parts[1]) - 1, 1).toLocaleString('pt-BR', { month: 'long' });
             const q = parts[2] === 'Q1' ? '1ª Quinzena' : '2ª Quinzena';
             return `${q} de ${month} de ${year}`;
@@ -546,7 +633,7 @@
                                                     <p class="text-gray-400">Bruto: ${formatter.format(entry.totalEarnings)}</p>
                                                     <p class="text-red-400 mb-1">Despesa: ${formatter.format(entry.dailyExpense || 0)}</p>
                                                     
-                                                    <!-- BOTÕES DE EDIÇÃO E EXCLUSÃO (NOVO) -->
+                                                    <!-- BOTÕES DE EDIÇÃO E EXCLUSÃO -->
                                                     <div class="flex space-x-2 justify-end">
                                                         <button data-doc-id="${entry.date}" class="edit-btn text-xs text-orange-400 hover:text-orange-300 transition duration-150" title="Editar o registo do dia">
                                                             [Editar Dia]
@@ -568,28 +655,13 @@
             });
             
             setupQuinzenaToggleListeners();
-            setupDailyEntryListeners(); // CHAMA O NOVO OUVINTE
+            setupDailyEntryListeners(); 
         }
 
         // Função utilitária para formatar a data
         function formatDateDisplay(dateString) {
             const [year, month, day] = dateString.split('-');
             return `${day}/${month}/${year}`;
-        }
-        
-        // Função para alternar o menu lateral
-        function toggleMenu() {
-            const isOpen = quinzenaHistoryMenuEl.classList.toggle('-translate-x-full');
-        }
-
-        // Configura ouvintes para o toggle do menu
-        function setupMenuToggleListeners() {
-            menuToggleBtn.addEventListener('click', () => {
-                quinzenaHistoryMenuEl.classList.remove('-translate-x-full');
-            });
-            closeMenuBtn.addEventListener('click', () => {
-                quinzenaHistoryMenuEl.classList.add('-translate-x-full');
-            });
         }
         
         // Configura ouvintes para expandir/colapsar os cards de quinzena
@@ -603,6 +675,7 @@
                     if (targetEl.classList.contains('max-h-0')) {
                         // Abrir: define a altura para 'auto' no final da transição
                         targetEl.classList.remove('max-h-0');
+                        // Isso é um hack para o max-height funcionar com transition:
                         targetEl.style.maxHeight = targetEl.scrollHeight + "px";
                         arrowEl.classList.add('rotate-180');
                     } else {
@@ -615,7 +688,7 @@
             });
         }
 
-        // NOVO: Função para carregar dados para edição
+        // Função para carregar dados para edição
         async function loadEntryForEditing(date) {
             const entry = currentEntries.find(e => e.date === date);
 
@@ -650,11 +723,11 @@
             
             // Timeout para limpar a mensagem
             setTimeout(() => {
-                userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
+                userInfoEl.textContent = `Logado como: ${auth.currentUser?.email || 'Usuário Google'}`;
             }, 5000);
         }
         
-        // NOVO: Configura ouvintes para edição e exclusão de dias
+        // Configura ouvintes para edição e exclusão de dias
         function setupDailyEntryListeners() {
             document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -675,7 +748,7 @@
         // 7. Ouvinte de Dados em Tempo Real (onSnapshot)
         function subscribeToDailyEntries() {
             if (!isAuthReady || !db || !userId) {
-                setTimeout(subscribeToDailyEntries, 500);
+                // Se não estiver pronto, sai e espera o onAuthStateChanged resolver.
                 return;
             }
 
@@ -699,7 +772,8 @@
                 });
 
             } catch (error) {
-                 showError(`Erro ao tentar conectar ao Firestore: ${error.message}`);
+                 // Este erro só deve ocorrer se getEntriesCollectionRef falhar (userId null)
+                 console.error(error.message);
             }
         }
         
@@ -721,7 +795,7 @@
 
                 userInfoEl.textContent = `Registo para o dia ${formatDateDisplay(date)} salvo/atualizado com sucesso!`;
                 setTimeout(() => {
-                    userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
+                    userInfoEl.textContent = `Logado como: ${auth.currentUser?.email || 'Usuário Google'}`;
                 }, 3000);
 
             } catch (error) {
@@ -736,19 +810,95 @@
                 await deleteDoc(docRef);
                 userInfoEl.textContent = `Registo do dia ${formatDateDisplay(docId)} excluído com sucesso!`;
                 setTimeout(() => {
-                    userInfoEl.textContent = `Utilizador Ativo (ID): ${userId}`;
+                    userInfoEl.textContent = `Logado como: ${auth.currentUser?.email || 'Usuário Google'}`;
                 }, 3000);
             } catch (error) {
                 showError("Falha ao excluir o registo: " + error.message);
             }
         }
+        
+        // --- FUNÇÕES DE AUTENTICAÇÃO ---
+        function handleAuthError(error) {
+            let message = "Erro desconhecido. Tente novamente.";
+            // Mapeamento de códigos de erro do Firebase para mensagens amigáveis
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    message = "Email inválido. Verifique o formato.";
+                    break;
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    message = "Email ou senha incorretos.";
+                    break;
+                case 'auth/email-already-in-use':
+                    message = "Este email já está registado. Use a opção 'Entrar'.";
+                    break;
+                case 'auth/popup-closed-by-user':
+                    message = "Login com Google cancelado pelo utilizador.";
+                    break;
+                case 'auth/weak-password':
+                    message = "Senha muito fraca. Mínimo de 6 caracteres.";
+                    break;
+                default:
+                    console.error("Firebase Auth Error:", error.code, error.message);
+                    message = `Erro: ${error.message.split('(')[0]}`;
+            }
+            authErrorMessageEl.textContent = message;
+        }
+
+        async function setAuthPersistence(isRememberMe) {
+            const persistence = isRememberMe ? browserLocalPersistence : browserSessionPersistence;
+            await setPersistence(auth, persistence);
+        }
+
+        async function handleSignUp(email, password, isRememberMe) {
+            authErrorMessageEl.textContent = '';
+            try {
+                await setAuthPersistence(isRememberMe);
+                await createUserWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged irá lidar com a exibição do dashboard
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        async function handleSignIn(email, password, isRememberMe) {
+            authErrorMessageEl.textContent = '';
+            try {
+                await setAuthPersistence(isRememberMe);
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged irá lidar com a exibição do dashboard
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        async function handleGoogleSignIn(isRememberMe) {
+            authErrorMessageEl.textContent = '';
+            try {
+                await setAuthPersistence(isRememberMe);
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+                // onAuthStateChanged irá lidar com a exibição do dashboard
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+        
+        function handleLogout() {
+            authErrorMessageEl.textContent = '';
+            signOut(auth).catch((error) => {
+                 handleAuthError(error);
+            });
+        }
+
 
         // 10. Event Listener para o Formulário e Inputs
         function setupEventListeners() {
             dateInput.valueAsDate = new Date();
             
-            const inputIds = [...COUNT_KEYS, 'dailyExpense'];
-            inputIds.forEach(id => {
+            // Ouvinte para o cálculo de ganhos em tempo real
+            const countInputs = [...COUNT_KEYS];
+            countInputs.forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
                     const counts = COUNT_KEYS.reduce((acc, currentId) => {
                         acc[currentId] = parseInt(document.getElementById(currentId).value, 10) || 0;
@@ -759,6 +909,7 @@
                 });
             });
 
+            // Ouvinte para o formulário de Registo Diário
             formEl.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
@@ -783,8 +934,36 @@
                 saveDailyEntry(date, counts, totalEarnings, dailyExpense);
             });
             
+            // Ouvinte para o Formulário de Autenticação (Login/Registo por Email)
+            signInBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                const isRememberMe = rememberMeCheckbox.checked;
+                handleSignIn(email, password, isRememberMe);
+            });
+
+            signUpBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                const isRememberMe = rememberMeCheckbox.checked;
+                handleSignUp(email, password, isRememberMe);
+            });
+            
+            googleSignInBtn.addEventListener('click', () => {
+                const isRememberMe = rememberMeCheckbox.checked;
+                handleGoogleSignIn(isRememberMe);
+            });
+            
+            logoutBtn.addEventListener('click', handleLogout);
+
             // Ouvinte de Evento do Botão de Tema
             themeToggleBtn.addEventListener('click', toggleTheme);
+
+            // Ouvintes do menu lateral
+            menuToggleBtn.addEventListener('click', () => quinzenaHistoryMenuEl.classList.remove('-translate-x-full'));
+            closeMenuBtn.addEventListener('click', () => quinzenaHistoryMenuEl.classList.add('-translate-x-full'));
         }
 
 
@@ -793,12 +972,11 @@
             loadTheme(); // Carrega o tema antes da inicialização do Firebase
             await setupFirebase();
             setupEventListeners();
-            setupMenuToggleListeners();
-            subscribeToDailyEntries();
         });
 
     </script>
 </body>
 </html>
+
 
 
