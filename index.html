@@ -7,62 +7,136 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-default); transition: 0.3s; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-default); transition: 0.3s; -webkit-tap-highlight-color: transparent; }
         :root { --bg-body: #f7f9fb; --bg-card: #ffffff; --bg-input: #ffffff; --text-default: #1f2937; --text-secondary: #4b5563; }
         body.dark-mode { --bg-body: #111827; --bg-card: #1f2937; --bg-input: #374151; --text-default: #f9fafb; --text-secondary: #d1d5db; }
         .theme-card-bg { background-color: var(--bg-card) !important; color: var(--text-default) !important; }
         .theme-input { background-color: var(--bg-input) !important; color: var(--text-default) !important; border: 1px solid rgba(156,163,175,0.2) !important; }
         #menu-toggle-btn { background-color: #f97316; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
     </style>
 </head>
 <body class="theme-body-bg p-0">
 
+    <!-- Botão Menu Lateral -->
     <button id="menu-toggle-btn" class="fixed top-4 left-4 z-40 p-3 text-white rounded-xl transition hover:scale-105 hidden">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
     </button>
     
+    <!-- Menu Lateral (Histórico) -->
     <div id="quinzena-history-menu" class="fixed top-0 left-0 w-80 bg-gray-900 text-white h-full z-50 transform -translate-x-full transition-transform duration-300 p-6 flex flex-col shadow-2xl">
         <div class="flex justify-between items-center mb-8">
-            <div><h2 class="text-2xl font-black text-orange-500 tracking-tighter">HISTÓRICO</h2><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Relatórios de Produção</p></div>
-            <button id="close-menu-btn" class="p-2 hover:bg-gray-800 rounded-full transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <div>
+                <h2 class="text-2xl font-black text-orange-500 tracking-tighter">HISTÓRICO</h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Resumo das Quinzenas</p>
+            </div>
+            <button id="close-menu-btn" class="p-2 hover:bg-gray-800 rounded-full transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
         </div>
-        <div id="quinzena-summary-list" class="space-y-6 flex-grow overflow-y-auto pr-2"></div>
+        <div id="quinzena-summary-list" class="space-y-6 flex-grow overflow-y-auto pr-2 custom-scroll"></div>
         <div class="mt-4 pt-4 border-t border-gray-800 space-y-3">
             <button id="theme-toggle-btn" class="w-full py-3 bg-gray-800 rounded-2xl text-xs font-black uppercase tracking-widest">Mudar Tema</button>
-            <button id="logout-btn" class="w-full py-3 text-red-500 hover:bg-red-500/10 rounded-2xl text-xs font-black uppercase tracking-widest transition">Sair</button>
+            <button id="logout-btn" class="w-full py-3 text-red-500 hover:bg-red-500/10 rounded-2xl text-xs font-black uppercase tracking-widest transition">Sair da Conta</button>
         </div>
     </div>
 
     <div class="p-4 sm:p-8 max-w-4xl mx-auto">
+        
+        <!-- Tela de Autenticação -->
         <div id="auth-container" class="max-w-md mx-auto mt-12 p-8 theme-card-bg rounded-[2.5rem] shadow-2xl border border-gray-100">
-            <div class="text-center mb-8"><h1 class="text-4xl font-black tracking-tighter">LOG SERVIÇOS</h1></div>
+            <div class="text-center mb-8">
+                <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 inline-block">App de Ganhos</span>
+                <h1 class="text-4xl font-black tracking-tighter">LOG SERVIÇOS</h1>
+            </div>
             <form id="email-auth-form" class="space-y-4">
                 <input type="email" id="email" placeholder="E-mail" required class="w-full p-4 border rounded-2xl theme-input outline-none focus:ring-2 focus:ring-orange-500 font-medium">
                 <input type="password" id="password" placeholder="Senha" required class="w-full p-4 border rounded-2xl theme-input outline-none focus:ring-2 focus:ring-orange-500 font-medium">
-                <div class="flex items-center px-1"><input type="checkbox" id="rememberMe" class="h-4 w-4 text-orange-600 rounded" checked><label for="rememberMe" class="ml-2 text-sm font-bold opacity-60">Manter conectado</label></div>
+                <div class="flex items-center space-x-2 px-1">
+                    <input type="checkbox" id="rememberMe" class="h-4 w-4 text-orange-600 rounded" checked>
+                    <label for="rememberMe" class="ml-2 text-sm font-bold opacity-60">Manter conectado</label>
+                </div>
                 <button type="submit" id="sign-in-btn" class="w-full py-4 bg-orange-600 text-white font-black rounded-2xl uppercase shadow-lg hover:bg-orange-700 transition">Entrar</button>
                 <button type="button" id="sign-up-btn" class="w-full py-2 text-blue-500 font-bold text-xs uppercase hover:underline">Criar Nova Conta</button>
+                
+                <div class="flex items-center my-4"><div class="flex-grow border-t opacity-10"></div><span class="px-3 text-[10px] font-bold opacity-30 uppercase">Ou</span><div class="flex-grow border-t opacity-10"></div></div>
+                
+                <button type="button" id="google-btn" class="w-full py-3 bg-white border border-gray-200 text-gray-700 font-bold rounded-2xl shadow-sm flex items-center justify-center space-x-2 text-sm hover:bg-gray-50 transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                    <span>Entrar com Google</span>
+                </button>
+
                 <p id="auth-error-display" class="text-center text-red-500 text-[10px] font-black mt-4 uppercase tracking-wider"></p>
             </form>
         </div>
 
+        <!-- Dashboard do Aplicativo -->
         <div id="main-content" class="hidden">
-            <header class="mb-6"><h1 class="text-4xl font-black tracking-tighter theme-label">🛵 Meus Ganhos</h1><p id="user-info" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">---</p></header>
-            <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-8 rounded-[3rem] shadow-2xl mb-10 relative overflow-hidden">
-                <h2 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Total do Mês Atual</h2>
-                <p id="total-net-accumulated" class="text-6xl font-black tracking-tighter">R$ 0,00</p>
-                <div class="mt-8 pt-6 border-t border-white/20 flex justify-between"><div class="text-left"><p class="text-[9px] font-black uppercase opacity-60">Faturamento</p><p id="gross-total-summary" class="text-xl font-bold">R$ 0,00</p></div><div class="text-right"><p class="text-[9px] font-black uppercase opacity-60">Gasolina</p><p id="expense-total-summary" class="text-xl font-bold text-orange-200">R$ 0,00</p></div></div>
+            <header class="mb-6">
+                <h1 class="text-4xl font-black tracking-tighter theme-label">🛵 Painel de Ganhos</h1>
+                <p id="user-info" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Carregando usuário...</p>
+            </header>
+
+            <!-- Resumo Mensal Dinâmico -->
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-8 rounded-[3rem] shadow-2xl mb-6 relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">Acumulado do Mês</h2>
+                    <p id="total-net-accumulated" class="text-6xl font-black tracking-tighter">R$ 0,00</p>
+                    <div class="mt-8 pt-6 border-t border-white/20 flex justify-between">
+                        <div><p class="text-[9px] font-black uppercase opacity-60">Bruto Total</p><p id="gross-total-summary" class="text-xl font-bold">R$ 0,00</p></div>
+                        <div class="text-right"><p class="text-[9px] font-black uppercase opacity-60">Gastos Mensais</p><p id="expense-total-summary" class="text-xl font-bold text-orange-200">R$ 0,00</p></div>
+                    </div>
+                </div>
+                <div class="absolute -right-10 -bottom-10 opacity-10 rotate-12">
+                    <svg width="250" height="250" viewBox="0 0 24 24" fill="white"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.97 4.44c-.31.17-.66.17-.97 0l-7.97-4.44c-.32-.17-.53-.5-.53-.88v-9c0-.38.21-.71.53-.88l7.97-4.44c.31-.17.66-.17.97 0l7.97 4.44c.32.17.53.5.53.88v9z"/></svg>
+                </div>
             </div>
 
+            <!-- RELATÓRIO DO DIA SELECIONADO -->
+            <div id="daily-report-card" class="theme-card-bg p-6 rounded-[2.5rem] shadow-lg border border-orange-100 mb-8 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-black uppercase tracking-widest text-orange-500">Relatório do Dia</h2>
+                    <span id="report-date-label" class="text-xs font-bold opacity-50">00/00/0000</span>
+                </div>
+                <div id="daily-report-content" class="space-y-2 text-xs">
+                    <!-- O conteúdo detalhado por categoria aparece aqui -->
+                </div>
+                <div class="mt-4 pt-4 border-t flex justify-between items-end border-gray-100">
+                    <p class="text-[9px] font-bold uppercase opacity-40 italic">Líquido do dia:</p>
+                    <p id="report-net-total" class="text-xl font-black text-green-500">R$ 0,00</p>
+                </div>
+            </div>
+
+            <!-- Formulário de Lançamento Diário -->
             <div id="form-card" class="theme-card-bg p-8 rounded-[3rem] shadow-xl border border-gray-100 mb-20">
-                <h2 class="text-2xl font-black mb-8 tracking-tight">LANÇAR DIA</h2>
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="w-2 h-8 bg-orange-500 rounded-full"></div>
+                    <h2 class="text-2xl font-black tracking-tight">LANÇAR PRODUÇÃO</h2>
+                </div>
+                
                 <form id="daily-entry-form" class="space-y-6">
-                    <input type="date" id="entryDate" required class="w-full p-5 border rounded-[1.5rem] theme-input font-black text-xl shadow-inner outline-none">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-gray-400 px-1 tracking-widest">Selecione a Data</label>
+                        <input type="date" id="entryDate" required class="w-full p-5 border rounded-[1.5rem] theme-input font-black text-xl shadow-inner outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    
+                    <!-- Inputs de Categorias -->
                     <div class="grid grid-cols-2 gap-4" id="inputs-container"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-black uppercase text-gray-400 px-1">Envelope Cartório (7,00)</label><input type="number" id="cartorioEnvelopeCount" placeholder="0" class="w-full p-4 border rounded-2xl theme-input font-black text-lg"></div>
-                    <div class="p-6 bg-orange-50 dark:bg-orange-950/20 rounded-[2rem] flex justify-between items-center border border-orange-100"><span class="text-[10px] font-black uppercase text-orange-600 tracking-widest">Bruto Estimado:</span><span id="daily-estimated-earning" class="text-3xl font-black text-orange-700 dark:text-orange-400 tracking-tighter">R$ 0,00</span></div>
-                    <input type="number" id="dailyExpense" step="0.01" placeholder="Gasto Gasolina (R$)" class="w-full p-5 border rounded-[1.5rem] theme-input font-black text-2xl text-red-500 shadow-inner">
-                    <button type="submit" class="w-full py-6 bg-green-600 text-white font-black rounded-[2rem] shadow-2xl uppercase tracking-[0.2em] text-sm hover:bg-green-700 transition">Salvar Lançamento</button>
+                    
+                    <div class="p-6 bg-orange-50 dark:bg-orange-950/20 rounded-[2rem] flex justify-between items-center border border-orange-100 dark:border-orange-900/30">
+                        <span class="text-[10px] font-black uppercase text-orange-600 tracking-widest">Ganho Bruto:</span>
+                        <span id="daily-estimated-earning" class="text-3xl font-black text-orange-700 dark:text-orange-400 tracking-tighter">R$ 0,00</span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-red-500 px-1 tracking-widest">Despesa (Gasolina/Lanche)</label>
+                        <input type="number" id="dailyExpense" step="0.01" placeholder="0,00" class="w-full p-5 border rounded-[1.5rem] theme-input font-black text-2xl text-red-500 shadow-inner outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+
+                    <button type="submit" class="w-full py-6 bg-green-600 text-white font-black rounded-[2.5rem] shadow-2xl uppercase tracking-[0.2em] text-sm hover:bg-green-700 transition active:scale-95">
+                        Salvar Lançamento
+                    </button>
                 </form>
             </div>
         </div>
@@ -70,8 +144,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, query, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const config = { apiKey: "AIzaSyDcc4VjTJfZlO7wY3r5ugpkJ3jxMqlCB9k", authDomain: "log-20.firebaseapp.com", projectId: "log-20", storageBucket: "log-20.firebasestorage.app", messagingSenderId: "1037378230673", appId: "1:1037378230673:web:e5cf864742139b47922230" };
         const PRICES = { flashCount: 1.7, flashExpressCount: 2.1, interlogCount: 1.5, interlogExpressCount: 2.0, mobiCount: 1.9, cartorioCount: 3.0, ecommerceCount: 3.0, loggiCount: 2.5, cartorioEnvelopeCount: 7.0 };
@@ -81,16 +155,22 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        let cachedEntries = [];
 
+        // Inicia formulário dinâmico
         const inputs = document.getElementById('inputs-container');
-        Object.keys(PRICES).forEach(k => { if(k === 'cartorioEnvelopeCount') return; inputs.innerHTML += `<div class="space-y-1"><label class="text-[9px] font-black uppercase text-gray-400 px-1">${NAMES[k]}</label><input type="number" id="${k}" placeholder="0" class="w-full p-4 border rounded-2xl theme-input font-black text-lg"></div>`; });
+        Object.keys(PRICES).forEach(k => {
+            if(k === 'cartorioEnvelopeCount') return;
+            inputs.innerHTML += `<div class="space-y-1"><label class="text-[9px] font-black uppercase text-gray-400 px-1">${NAMES[k]}</label><input type="number" id="${k}" placeholder="0" class="w-full p-4 border rounded-2xl theme-input font-black text-lg"></div>`;
+        });
+        document.getElementById('daily-entry-form').insertAdjacentHTML('beforeend', `<div class="space-y-1 mb-6"><label class="text-[9px] font-black uppercase text-gray-400 px-1">Envelope Cartório (7,00)</label><input type="number" id="cartorioEnvelopeCount" placeholder="0" class="w-full p-4 border rounded-2xl theme-input font-black text-lg"></div>`);
 
         onAuthStateChanged(auth, user => {
             if(user) {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 document.getElementById('menu-toggle-btn').classList.remove('hidden');
-                document.getElementById('user-info').textContent = user.email;
+                document.getElementById('user-info').textContent = "Logado: " + user.email;
                 sync(user.uid);
             } else {
                 document.getElementById('auth-container').classList.remove('hidden');
@@ -101,7 +181,9 @@
         function sync(uid) {
             onSnapshot(query(collection(db, `artifacts/log-20/users/${uid}/daily_earnings`)), snap => {
                 const entries = []; snap.forEach(d => entries.push({ date: d.id, ...d.data() }));
+                cachedEntries = entries;
                 render(entries);
+                updateDailyReport(); // Atualiza relatório ao carregar
             });
         }
 
@@ -109,6 +191,7 @@
             const now = new Date();
             const currM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
             let mG = 0, mE = 0; const qMap = {};
+
             entries.forEach(e => {
                 if(e.date.startsWith(currM)) { mG += e.totalEarnings || 0; mE += e.dailyExpense || 0; }
                 const [y, m, d] = e.date.split('-');
@@ -117,18 +200,66 @@
                 qMap[qId].gross += e.totalEarnings; qMap[qId].exp += (e.dailyExpense || 0);
                 Object.keys(PRICES).forEach(k => qMap[qId].cats[k] = (qMap[qId].cats[k] || 0) + (e[k] || 0));
             });
+
             document.getElementById('total-net-accumulated').textContent = formatter.format(mG - mE);
             document.getElementById('gross-total-summary').textContent = formatter.format(mG);
             document.getElementById('expense-total-summary').textContent = formatter.format(mE);
+
             document.getElementById('quinzena-summary-list').innerHTML = Object.values(qMap).sort((a,b)=>b.id.localeCompare(a.id)).map(q => `
                 <div class="bg-gray-800/80 rounded-[2.5rem] p-6 border border-white/5 shadow-2xl">
                     <div class="flex justify-between mb-5">
-                        <div><p class="text-[8px] text-orange-500 font-black uppercase tracking-widest">PERÍODO</p><h3 class="text-xl font-black">${q.id}</h3></div>
-                        <div class="text-right"><p class="text-[8px] text-green-500 font-black uppercase tracking-widest">LÍQUIDO</p><p class="text-xl font-black text-green-400">${formatter.format(q.gross - q.exp)}</p></div>
+                        <div><p class="text-[8px] text-orange-500 font-black">PERÍODO</p><h3 class="text-xl font-black">${q.id}</h3></div>
+                        <div class="text-right"><p class="text-[8px] text-green-500 font-black">LÍQUIDO</p><p class="text-xl font-black text-green-400">${formatter.format(q.gross - q.exp)}</p></div>
                     </div>
-                    <div class="bg-black/20 rounded-2xl p-4 text-[9px] space-y-1">${Object.keys(PRICES).filter(k=>q.cats[k]>0).map(k=>`<div class="flex justify-between border-b border-white/5 pb-1"><span>${NAMES[k]}</span><span class="font-bold">${q.cats[k]} un.</span></div>`).join('')}</div>
+                    <div class="bg-black/20 rounded-2xl p-4 text-[10px] space-y-1">${Object.keys(PRICES).filter(k=>q.cats[k]>0).map(k=>`<div class="flex justify-between border-b border-white/5 pb-1"><span>${NAMES[k]}</span><span class="font-bold">${q.cats[k]} un.</span></div>`).join('')}</div>
                 </div>`).join('');
         }
+
+        // Função para mostrar o relatório detalhado do dia selecionado
+        function updateDailyReport() {
+            const selectedDate = document.getElementById('entryDate').value;
+            const reportCard = document.getElementById('daily-report-card');
+            const reportContent = document.getElementById('daily-report-content');
+            
+            if(!selectedDate) {
+                reportCard.classList.add('hidden');
+                return;
+            }
+
+            const dayData = cachedEntries.find(e => e.date === selectedDate);
+            document.getElementById('report-date-label').textContent = selectedDate.split('-').reverse().join('/');
+
+            if(dayData) {
+                reportCard.classList.remove('hidden');
+                let html = '';
+                Object.keys(PRICES).forEach(k => {
+                    const count = dayData[k] || 0;
+                    if(count > 0) {
+                        const val = count * PRICES[k];
+                        html += `
+                            <div class="flex justify-between items-center py-1 border-b border-gray-100">
+                                <span class="font-bold text-gray-500">${NAMES[k]} <span class="text-[9px] opacity-40 ml-1">x${count}</span></span>
+                                <span class="font-black text-gray-800">${formatter.format(val)}</span>
+                            </div>`;
+                    }
+                });
+                
+                if(dayData.dailyExpense > 0) {
+                    html += `
+                        <div class="flex justify-between items-center py-1 text-red-500">
+                            <span class="font-bold uppercase text-[9px]">Gasto Combustível</span>
+                            <span class="font-black">-${formatter.format(dayData.dailyExpense)}</span>
+                        </div>`;
+                }
+
+                reportContent.innerHTML = html || '<p class="text-center opacity-30 py-2">Sem entregas registradas.</p>';
+                document.getElementById('report-net-total').textContent = formatter.format(dayData.totalEarnings - (dayData.dailyExpense || 0));
+            } else {
+                reportCard.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('entryDate').addEventListener('change', updateDailyReport);
 
         const form = document.getElementById('daily-entry-form');
         form.addEventListener('input', () => {
@@ -144,8 +275,10 @@
             await setDoc(doc(db, `artifacts/log-20/users/${auth.currentUser.uid}/daily_earnings`, date), data);
             form.reset();
             document.getElementById('daily-estimated-earning').textContent = formatter.format(0);
+            updateDailyReport(); // Atualiza relatório após salvar
         };
 
+        // Handlers de Login
         document.getElementById('email-auth-form').onsubmit = async e => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -155,10 +288,13 @@
             signInWithEmailAndPassword(auth, email, pass).catch(err => document.getElementById('auth-error-display').textContent = "ERRO: " + err.code);
         };
 
+        document.getElementById('google-btn').onclick = async () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider).catch(err => document.getElementById('auth-error-display').textContent = "ERRO GOOGLE: " + err.code);
+        };
+
         document.getElementById('sign-up-btn').onclick = () => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            createUserWithEmailAndPassword(auth, email, pass).catch(err => document.getElementById('auth-error-display').textContent = "ERRO: " + err.code);
+            createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).catch(err => document.getElementById('auth-error-display').textContent = "ERRO: " + err.code);
         };
 
         document.getElementById('logout-btn').onclick = () => signOut(auth);
@@ -168,5 +304,4 @@
     </script>
 </body>
 </html>
-
 
